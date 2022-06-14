@@ -10,6 +10,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.metrics import plot_confusion_matrix
 from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier
 from seaborn import heatmap
 
 df = pd.read_csv('results.csv')
@@ -59,10 +60,28 @@ print(len(df_no_missing))
 df_profitable = df_no_missing[df_no_missing['result_label'] == 1]
 df_non_profitable = df_no_missing[df_no_missing['result_label'] == 0]
 
-df_profitable_downsampled = resample(df_profitable, replace=False, n_samples=900)
-df_non_profitable_downsampled = resample(df_non_profitable, replace=False, n_samples=900)
+df_profitable_downsampled = resample(df_profitable, replace=False, n_samples=550)
+df_non_profitable_downsampled = resample(df_non_profitable, replace=False, n_samples=550)
 
 df_downsampled = pd.concat([df_profitable_downsampled, df_non_profitable_downsampled])
+
+# X = df_downsampled.drop(['result_label',
+#                          'MACD().Avg',
+#                          'ExpAverage(close, length = 9)',
+#                          'ExpAverage(close, length = 21)',
+#                          'ExpAverage(close, length = 34)',
+#                          'ExpAverage(close, length = 55)',
+#                          'ExpAverage(close, length = 88)',
+#                          'ExpAverage(close, length = 100)',
+#                          'BollingerBands().UpperBand',
+#                          'BollingerBands().LowerBand',
+#                          'StochasticFull().FullD',
+#                          'StochasticFull().FullK',
+#                          'imp_volatility',
+#                          'volume',
+#                          'close',
+#                          'GetTime()'],
+#                         axis=1).copy()
 
 X = df_downsampled.drop('result_label', axis=1).copy()
 print(X.head())
@@ -95,6 +114,18 @@ plot_confusion_matrix(clf_svm,
                       display_labels=["Non Profitable", "Profitable"])
 
 plt.show()
+
+
+
+# clf_forest = RandomForestClassifier(n_estimators=100)
+# clf_forest.fit(X_train_scaled, y_train)
+#
+# plot_confusion_matrix(clf_forest,
+#                       X_test_scaled,
+#                       y_test,
+#                       values_format='d',
+#                       display_labels=["Non Profitable", "Profitable"])
+# plt.show()
 
 # param_grid = [
 #     {'C': [0.5, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000],
