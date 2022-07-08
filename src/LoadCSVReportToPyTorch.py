@@ -2,7 +2,7 @@ import csv
 import numpy as np
 import torch
 
-path = 'results.csv'
+path = 'results_only_buy_to_open.csv'
 
 #results_numpy = np.genfromtxt(path, dtype = [('col{}'.format(i+1), float) for i in range(20)], delimiter=",", missing_values="", filling_values=0)
 

@@ -2,7 +2,7 @@ import openpyxl
 from datetime import datetime
 
 
-path = r'C:\Users\i506998\OneDrive - SAP SE\Documents\private\Master Degree\Final Project\My research\TD_Ameritrade\StrategyReports_SPY_61322_only_buy_to_open_13_06_22.xlsx'
+path = r'C:\Users\i506998\OneDrive - SAP SE\Documents\private\Master Degree\Final Project\My research\TD_Ameritrade\data.xlsx'
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
 
@@ -44,11 +44,11 @@ for row in range(sheet_obj.max_row-1):
         profit_loss = profit_loss.replace(",", "")
 
         pl_size = float(profit_loss)/300
-        #if pl_size >= 0.1 :
-        if is_loss :
-            s = s + "," + str('0')
-        else:
-            s = s + "," + str('1')
+        if pl_size >= 0.1 :
+            if is_loss :
+                s = s + "," + str('0')
+            else:
+                s = s + "," + str('1')
         # else:
         #     s = s + "," + str('0')
 
