@@ -1,13 +1,12 @@
 import openpyxl
 from datetime import datetime
-import time as time_lib
 
 
-path = r'C:\Users\i506998\OneDrive - SAP SE\Documents\private\Master Degree\Final Project\My research\TradingView\ERIK_TEST_MACD_Strategy_List_of_Trades_2022-08-08.xlsx'
+path = r'C:\Users\i506998\OneDrive - SAP SE\Documents\private\Master Degree\Final Project\My research\TradingView\ERIK_TEST_MACD_Strategy_List_of_Trades_2022-08-21_deep_data_from_excel.xlsx'
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
 
-results = open("results_new_tradingview.csv", "a")
+results = open("results_new_tradingview_000_percents_new.csv", "a")
 results.truncate(0)
 
 header = 'MACD(),MACDdiff,MACD().Avg,RSI(),"ExpAverage(close, length = 9)","ExpAverage(close, length = 21)",' \
@@ -44,8 +43,8 @@ for row in range(2, sheet_obj.max_row):
         is_loss = True if profit_loss<0 else False
         # profit_loss = profit_loss.replace("(", "").replace(")", "").replace("$", "").replace(",", "")
 
-        pl_size = float(profit_loss)/sheet_obj.cell(row, column=5).value
-        # if pl_size >= 0.1 :
+        pl_size = abs(float(profit_loss))/sheet_obj.cell(row, column=5).value
+        # if pl_size >= 0.0025 :
         if is_loss :
             s = s + "," + str('0')
         else:
@@ -56,7 +55,7 @@ for row in range(2, sheet_obj.max_row):
         s = s + "," + str(profit_loss) + "\n"
 
         results.write(s)
-        print(s)
+        # print(s)
 
 
 

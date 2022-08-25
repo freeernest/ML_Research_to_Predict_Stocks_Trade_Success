@@ -5,10 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from pandas import Series, DataFrame
-from pandas._typing import FrameOrSeries
 from sklearn.utils import resample
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold, cross_val_score
-from sklearn.preprocessing import scale
+from sklearn.preprocessing import scale, RobustScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score, plot_confusion_matrix
 from sklearn.decomposition import PCA
@@ -17,11 +16,11 @@ from seaborn import heatmap
 import openpyxl
 import pickle
 
-RESULTS_NEW_CSV = 'results_new_tradingview.csv'
+RESULTS_NEW_CSV = 'results_new_tradingview_000_percents_new.csv'
 
 FINALIZED_MODEL___SAV = 'finalized_model_tradingview.sav'
 
-AS_PROFITABLE_NEW_CSV = "results_of_only_predicted_as_profitable_new.csv"
+AS_PROFITABLE_NEW_CSV = "results_of_only_predicted_as_profitable.csv"
 
 
 def load_report_prepare_model_and_print_results():
@@ -73,20 +72,24 @@ def load_report_prepare_model_and_print_results():
     df_profitable = df_no_missing[df_no_missing['result_label'] == 1]
     df_non_profitable = df_no_missing[df_no_missing['result_label'] == 0]
 
+    # show_full_confusion_matrix(df_no_missing)
+
     print(df_profitable.head())
     print('df_profitable length' + str(len(df_profitable)))
     print('df_non_profitable length' + str(len(df_non_profitable)))
 
-    df_profitable_downsampled = resample(df_profitable, replace=False, n_samples=522)
-    df_non_profitable_downsampled = resample(df_non_profitable, replace=False, n_samples=526)
+    df_profitable_downsampled = resample(df_profitable, replace=False, n_samples=10691)
+    df_non_profitable_downsampled = resample(df_non_profitable, replace=False, n_samples=10691)
 
-    df_downsampled = pd.concat([df_profitable_downsampled, df_non_profitable_downsampled,
-                                df_profitable_downsampled, df_non_profitable_downsampled,
-                                df_profitable_downsampled, df_non_profitable_downsampled,
-                                df_profitable_downsampled, df_non_profitable_downsampled,
-                                df_profitable_downsampled, df_non_profitable_downsampled,
-                                df_profitable_downsampled, df_non_profitable_downsampled,
-                                df_profitable_downsampled, df_non_profitable_downsampled])
+    df_downsampled = pd.concat([df_profitable_downsampled, df_non_profitable_downsampled])
+                                # df_profitable_downsampled, df_non_profitable_downsampled,
+                                # df_profitable_downsampled, df_non_profitable_downsampled,
+                                # df_profitable_downsampled, df_non_profitable_downsampled,
+                                # df_profitable_downsampled, df_non_profitable_downsampled,
+                                # df_profitable_downsampled, df_non_profitable_downsampled,
+                                # df_profitable_downsampled, df_non_profitable_downsampled])
+
+    # df_downsampled = df_no_missing
 
     print(df_downsampled.head())
     # x = df_downsampled.drop(['result_label',
@@ -118,10 +121,13 @@ def load_report_prepare_model_and_print_results():
     print("Number of '1' labels " + str(len(y.loc[y == 1])))
     print("Number of '0' labels " + str(len(y.loc[y == 0])))
 
+    standardScaler = StandardScaler()
+    standardScaler.fit_transform(df_no_missing.drop(['result_label', 'profit_loss'], axis=1).copy())
     X_train, X_test, y_train, y_test = train_test_split(x, y)
-    X_train_scaled = scale(X_train)
-    X_test_scaled = scale(X_test)
+    X_train_scaled = standardScaler.transform(X_train)
+    X_test_scaled = standardScaler.transform(X_test)
 
+    pickle.dump(standardScaler, open('standardScaler.sav', 'wb'))
     # print(len(X_train_scaled[0]))
 
     print("Number of '1' labels in test data " + str(len(y_test.loc[y_test == 1])))
@@ -130,6 +136,7 @@ def load_report_prepare_model_and_print_results():
     # perform_cross_validation_and_print_optimal_parameters(X_train_scaled, y_train)
     clf_svm: SVC = train_SVM_and_show_its_confusion_matrix(X_test_scaled, X_train_scaled, y_test, y_train)
 
+
     # save the model to disk
     filename = FINALIZED_MODEL___SAV
     pickle.dump(clf_svm, open(filename, 'wb'))
@@ -137,7 +144,10 @@ def load_report_prepare_model_and_print_results():
     # load the model from disk
     clf_svm: SVC = pickle.load(open(filename, 'rb'))
 
-    write_down_only_the_rows_which_predicted_as_profitable(clf_svm, df_no_missing)
+
+    show_full_confusion_matrix(df_no_missing)
+
+    write_down_only_the_rows_which_predicted_as_profitable(clf_svm, df_no_missing, standardScaler)
 
     print_profit_sum(AS_PROFITABLE_NEW_CSV)
     print_profit_sum(RESULTS_NEW_CSV)
@@ -150,18 +160,20 @@ def load_report_prepare_model_and_print_results():
 def print_profit_sum(file_path : str):
     profitable_df = pd.read_csv(file_path)
     print('profitable_df: \n')
-    print(profitable_df.head(20))
+    # print(profitable_df.head(20))
     profitable_df_sum = profitable_df['profit_loss'].copy().sum()
+    profitable_df_size = profitable_df['profit_loss'].copy().size
     print(file_path + '\n profitable_df_sum = ' + str(profitable_df_sum))
+    print(file_path + '\n profitable_df_size = ' + str(profitable_df_size))
 
 
-def write_down_only_the_rows_which_predicted_as_profitable(clf_svm, df_no_missing):
+def write_down_only_the_rows_which_predicted_as_profitable(clf_svm, df_no_missing, standardScaler : StandardScaler):
     results = open(AS_PROFITABLE_NEW_CSV, "a")
     results.truncate(0)
     header = 'MACD(),MACDdiff,MACD().Avg,RSI(),"ExpAverage(close, length = 9)","ExpAverage(close, length = 21)",' \
              '"ExpAverage(close, length = 34)","ExpAverage(close, length = 55)","ExpAverage(close, length = 88)",' \
              '"ExpAverage(close, length = 100)",BollingerBands().UpperBand,BollingerBands().LowerBand,CCI(),' \
-             'StochasticFull().FullD,StochasticFull().FullK,imp_volatility,volume,close,GetTime(),result_label,profit_loss'
+             'StochasticFull().FullD,StochasticFull().FullK,imp_volatility,volume,close,GetTime(),result_label,profit_loss,predicted_result'
     results.write(header + "\n")
     print('df_no_missing \n')
     print(df_no_missing.head())
@@ -169,7 +181,7 @@ def write_down_only_the_rows_which_predicted_as_profitable(clf_svm, df_no_missin
     print(df_no_missing_x.head())
     df_no_missing_y = df_no_missing.loc[:, 'result_label': 'profit_loss']
     print(df_no_missing_y.head())
-    df_no_missing_scaled_x = scale(df_no_missing_x)
+    df_no_missing_scaled_x = standardScaler.transform(df_no_missing_x)
     df_no_missing_scaled_x_df = pd.DataFrame(df_no_missing_scaled_x, columns=df_no_missing_x.columns)
     print('df_no_missing_scaled_x_df \n')
     print(df_no_missing_scaled_x_df.head())
@@ -184,19 +196,23 @@ def write_down_only_the_rows_which_predicted_as_profitable(clf_svm, df_no_missin
 
         shortened_row = row.drop('result_label').drop('profit_loss').copy()
         row_for_prediction = shortened_row.values.reshape(1, -1)
-        print(str(row_for_prediction))
-        print(str(row['profit_loss']))
+        # print(str(row_for_prediction))
+        # print(str(row['profit_loss']))
         prediction = clf_svm.predict(row_for_prediction)
-        print(str(prediction[0]))
+        # print(str(prediction[0]))
 
         if prediction[0] == 0:
             counter_of_0 += 1
+            # row['profit_loss'] = 0
         else:
             pd.DataFrame(row).T.to_csv(results,
                                        index=False,
                                        header=False,
                                        mode='a')
+            # results.write("," + str(prediction) + "\n")
             counter_of_1 += 1
+
+
     print('counter_of_0 ' + str(counter_of_0))
     print('counter_of_1 ' + str(counter_of_1))
 
@@ -297,7 +313,8 @@ def show_pca_relevance_graph(pca):
 
 
 def train_SVM_and_show_its_confusion_matrix(X_test_scaled, X_train_scaled, y_test, y_train):
-    clf_svm = SVC(C=100000000)
+    print("Partial Matrix")
+    clf_svm = SVC(C=100000)
     clf_svm = clf_svm.fit(X_train_scaled, y_train)
     # print(clf_svm.predict(X_test_scaled))
     plot_confusion_matrix(clf_svm,
@@ -306,8 +323,27 @@ def train_SVM_and_show_its_confusion_matrix(X_test_scaled, X_train_scaled, y_tes
                           values_format='d',
                           display_labels=["Non Profitable", "Profitable"])
     plt.show()
+    print("Partial Matrix")
     return clf_svm
 
+def show_full_confusion_matrix(df_no_missing):
+    print("Full Matrix")
+    clf_svm: SVC = pickle.load(open(FINALIZED_MODEL___SAV, 'rb'))
+    # print(clf_svm.predict(X_test_scaled))
+    X = df_no_missing.drop(['result_label', 'profit_loss'], axis=1).copy()
+    y = df_no_missing['result_label'].copy()
+
+    standardScaler: StandardScaler = pickle.load(open("standardScaler.sav", 'rb'))
+
+    X_scaled = standardScaler.transform(X)
+    print("Full Matrix")
+    plot_confusion_matrix(clf_svm,
+                          X_scaled,
+                          y,
+                          values_format='d',
+                          display_labels=["Non Profitable", "Profitable"])
+    plt.show()
+    print("Full Matrix")
 
 def k_fold_cross_validation(x: DataFrame, y: DataFrame):
     # Implementing cross validation
