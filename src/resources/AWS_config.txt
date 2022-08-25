@@ -1,0 +1,53 @@
+AWS flask web server IP address
+
+52.59.194.175
+
+http://52.59.194.175:8080/webhook
+
+C:\Users\i506998\Documents\AWS> ssh -i "AWS_Flask_web_server_key.pem" ubuntu@ec2-52-59-194-175.eu-central-1.compute.amazonaws.com
+
+source venv/bin/activate
+/etc/systemd/system/tradingview_bot.service
+
+sudo systemctl daemon-reload
+sudo systemctl start tradingview_bot
+sudo systemctl enable tradingview_bot
+
+sudo systemctl restart tradingview_bot
+
+sudo journalctl -u tradingview_bot -e
+
+gunicorn -b 0.0.0.0:8080 app:app
+
+curl -X POST -H "Content-Type: application/json" --data '{"username":"xyz","password":"xyz", "key":"119864"}' localhost:8080/webhook
+
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+sudo nano /etc/nginx/sites-available/default
+
+upstream flask_tradingview_bot {
+        server 127.0.0.1:8080;
+}
+
+scp -r -i "C:\Users\i506998\Documents\AWS\AWS_Flask_web_server_key.pem" C:\Users\i506998\Documents\App\* ubuntu@ec2-52-59-194-175.eu-central-1.compute.amazonaws.com:~/TradingView-Webhook-Bot/
+sudo scp -r ~/TradingView-Webhook-Bot/App/* ~/TradingView-Webhook-Bot/
+
+To get  authorization code:
+
+https://auth.tdameritrade.com/auth?response_type=code&redirect_uri=https%3A%2F%2F127.0.0.1&client_id=FREEERNESTF2%40AMER.OAUTHAP
+
+To get access_token / refresh_token (which should be valid for 90 days) IT NEED TO BE URL DECODED: 
+
+curl -X POST --header "Content-Type: application/x-www-form-urlencoded" -d "grant_type=authorization_code&refresh_token=&access_type=offline&code=2sYOilO4rcbl8rJKSScu4FOJ6Vb8JSu2rVBiYPJIwyOw%2FHK9XRZu4hk60V8azbCKS1mpEd7FLgEoz5O3VAMCfibAS4rXwLWr9BCYtqtB4ukbX%2FjuXLob6TYLAWefdn4%2Bmtq44%2BuHCzm5RqKyBn%2Bte0GEagGpWfNQIg3Cvvd0dHReztS5E%2BVI%2BYvgU13ppqNxR0kSijO0LLgFCle62XIetcxatkPqx%2BTv4XFuufCMtj5AX%2BKX%2BJej7x8Ta3WvDhIRNDegs%2BUfn9AildEdGmRnGOCpFYDnPnY5RUjgD1D99NxbzNl2IhMm6KU25h4upIXKMZbGZRm7UBRnbB7uGrUVktKWnUqEVnONqNV8shypAPSXtGAuN9OxuR5BkiM2DGvlc313nTxkOfcqwKv18%2BwYa%2B%2FZNQVeA19iedmrr816haD2JuPVYaIVaM2H1aqv9nnnnqHNz100MQuG4LYrgoVi%2FJHHvluzQBVBFceghn%2B9FCMO1MOakxnacuIeaoaOoatFFttmrPUV3QRSbGjnC1ZLMkaSKeBwWfsV2Er8S4MP5sDIWi8lnl1ZMuBtlxWuoPkYFifnxgJmaSzVSMntx66P%2F%2BYflCtzEyEfKW%2Bvm4Sy%2BF6cBCYvCmYRc5KyARZ812Z4wPuxEXOLBuJ3Uvw2QDUwzqL6V60BBgAqWdcvSjir99s51NzWXfEYtAysKkG1eesTlf%2BIanQLQjka9WG5HCGTkh%2BHapQh%2BIUWvftOti9Fhh4bompG%2BdT2hr1SyIxuvvNlUk%2Byvc2MkWDrd6WRkzkzRcc7m9QuNZu2BFhgbFd3IwkvV%2FMqDGtsHUKuE75LO8R8ALyCbd5JK5mg%2Bwllm45dZP%2BzAAA3ES2FJ29AtB6A7WdCHKomgO117VI6HCD1kuPx9cAYxi1PVwOU1CSVHwbI%2FcY6xoBaEkoK212FD3x19z9sWBHDJACbC00B75E&client_id=FREEERNESTF2%40AMER.OAUTHAP&redirect_uri=https%3A%2F%2F127.0.0.1" "https://api.tdameritrade.com/v1/oauth2/token"
+
+
+
+{
+  "access_token": "3PNOIhU73hecg6qx3ML3Ijnb21JEGisxWQ2v2zVhYs1Pv2azhBXRu13vDkObT9E+GTlK2OuVZskN2L0qv0sKDB0xouosWseVkKtoQPNliF1cI1rk0+w31CLr2uMmmHTNpB2lABltfSkrcxQ0L/W5UhP4XlfSZUGTZaa69wTb8WVPWvrahA9ul0hNTw1tpi+wdmHzYFd3BcF3iFwkR1XztGgC4kh3AeVZnrbp8ExwlJ0x5l6FPKOcyuPHphCJgHaex2VHbOyY5auKvZuO/PHp6dyw3mRKKtsusbi4OBKhEdVb/Z9yRykximVABj57L4zoxa635O/3Q3bj76/5Ia7IwJSUTZq+5b7oMSp5yWiplbzVn3oaa1vCD/gwn7HkVR/O6nqjfaalTaXaK0/oZrtU3cy3r2lJr1iGR7dfeXRdH3B7jWQ9aR8kWEBRFUOl8JKv4npHvkfeNxx1Z9jXKG5zDcWY4tjd2dJsTXF8UVNVMxiRlGGH4AFERnZ2LX+BcHL2Sa48TOXlQtEtJFbnnGMKyUjgOMzB7hnOvinpR100MQuG4LYrgoVi/JHHvlobQON3j1C0gwv0dl+efCW4dFHTZnrHvMrMIO6z71F4q1Cnq3pOa8RMBRmpwkJORmUhF52heUCQPVMUhH0SHuxPfBHCiPs7Wjk9i4mZtaAQNMcfr7BoOIuyek7KnQzYsoGklZmq4w3QGVGB+toqtigQOLj3hbFBApL7N5mzEkOFJTWLlMNfeIkSDLjgX1UnJ3LTHLfwqwyWToQCSlKeqAba5De6v19sQMCM/cFsokyTcj7q1qIr2sgifwwxzJZeyowU3SCnD7AqCnuTRN0KTvoMU1g1hIU08bTfukk6sr9XIQi7v+lrp44v7Gx7lncSoTpe02hKOhFDVAvVWN146BJ+7Dsiq4144231fH/qE6Fdlhz/KufA8Bx9B4daeVxK4BMeggzeTbfFK7Ug/IxVdtrOPtdnoN9oEyPnU4yo7ggvIJm5Toh5rjhY4Zuc9oPCkRtYD1ZOG684QwFgy91AwhoAwDXG3ixNZzrArSiez/0qtjVzqJmVQKMcRQ07EjVqNuvYOShuUBTC60ncaINrfQTl2zt/SF4A5k/71xqj212FD3x19z9sWBHDJACbC00B75E",
+  "refresh_token": "ILx1xH58sTmb4BRXs2peyf+FAQ2gVaAgY3HAixp872IM4ZPpJ9LCA7YRRymYd0ssO11Iv2330Cg5YM/UDym7gbpPvHVPi13+ZfdUIIpkbJAePwH6cTsk+51ZZgHMza8wmnx9HrADUwKpvGolTd3bog3fGS1DiJUXMasg3VOBAG5KO6aYSrnW+rf/zkKkeHfd6v53GiN2pCCD8qqmc/f9OpVhxTGxKlX/veyc6rVj06D/erWCjk0paXr87vDRzT+MTwd6ONFNpyUclsU5SDt/6wUANjMItxczxKWWMoxTQqlQgGcWtM7m+wjJqLuvtEm++gc8jlN7llChnhKQGtgssDo/5DB/ywyBbF9AV+PH6aLpP8BCG4kBfRK+gfN2JGmmkw4txdoegY9BIrkT+AfZ6/XUowfOz+aROPCAEyJknbd4BgUAOv5sTbfzE+K100MQuG4LYrgoVi/JHHvlYlP9DJevL1tGkRVj1bQFXi8/V/OuX72XDOCMSLtiFI/Z3rPGrQ4I0E4661iMBOq8EJ6B1GiD6C066BNpN4hgDPONZQdKQXP9S2m5ctPWd77NDtpeGM+pXpUGNiQVZ81924Iaj5A5RkmyKprwFD61D0fdet7NPFOvMSJIu/rJMvzJNYhkkADp6PqKBAVtlMOxPyki/vMmrIBAfnSNj3RTCSz+y3VPvyA97DnAQdPIX823iPZ13Y/ADSwOxvM/OLGqrF3VcCPQX0Ffmpzkv0jrDSmuXBv3T55LeUvlydK1l9sV4oBB0LCtIlH1XGE7xyh3ymuI4P1mfmoC/YnRQhLoWzoyqWSPKopypUQT34y0G5dy3PspjzKALepTvZ0AL3a8EoGDG2DVuKjFLL3ofdUA1s+MQcRvlvHkYKSdoSDzmKSi02cqnKg8LowR95w=212FD3x19z9sWBHDJACbC00B75E",
+  "scope": "PlaceTrades AccountAccess MoveMoney",
+  "expires_in": 1800,
+  "refresh_token_expires_in": 7776000,
+  "token_type": "Bearer"
+}
