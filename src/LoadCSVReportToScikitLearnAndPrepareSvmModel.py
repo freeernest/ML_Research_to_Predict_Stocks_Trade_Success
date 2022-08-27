@@ -1,29 +1,31 @@
-from typing import Union
-
+from sklearnex import patch_sklearn
+patch_sklearn()
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-from pandas import Series, DataFrame
+from pandas import DataFrame
 from sklearn.utils import resample
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold, cross_val_score
-from sklearn.preprocessing import scale, RobustScaler, StandardScaler
+from sklearn.preprocessing import scale, StandardScaler
 from sklearn.svm import SVC
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score, plot_confusion_matrix
+from sklearn.metrics import plot_confusion_matrix
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
-from seaborn import heatmap
-import openpyxl
+# from seaborn import heatmap
+# import openpyxl
 import pickle
+
 
 RESULTS_NEW_CSV = 'results_new_tradingview_000_percents_new.csv'
 
-FINALIZED_MODEL___SAV = 'finalized_model_tradingview.sav'
+FINALIZED_MODEL___SAV = 'finalized_model_tradingview_C1000000_G001.sav'
 
 AS_PROFITABLE_NEW_CSV = "results_of_only_predicted_as_profitable.csv"
 
 
 def load_report_prepare_model_and_print_results():
+
     df = pd.read_csv(RESULTS_NEW_CSV)
     print(len(df))
     print(len(df.loc[(df['MACD()'] == 0)
@@ -314,7 +316,7 @@ def show_pca_relevance_graph(pca):
 
 def train_SVM_and_show_its_confusion_matrix(X_test_scaled, X_train_scaled, y_test, y_train):
     print("Partial Matrix")
-    clf_svm = SVC(C=100000)
+    clf_svm = SVC(C=1000000, gamma=0.01)
     clf_svm = clf_svm.fit(X_train_scaled, y_train)
     # print(clf_svm.predict(X_test_scaled))
     plot_confusion_matrix(clf_svm,

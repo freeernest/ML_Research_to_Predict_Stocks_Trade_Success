@@ -1,18 +1,18 @@
 import openpyxl
 import pandas as pd
-from sklearn.preprocessing import RobustScaler, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from datetime import datetime
 from io import StringIO
 import pickle
 
 
-FINALIZED_MODEL_SAV = 'finalized_model_tradingview_2000_12_000_percent.sav'
+FINALIZED_MODEL_SAV = r'resources\finalized_model_tradingview_C100000_57percent_true_000.sav'
 path = r'C:\Users\i506998\OneDrive - SAP SE\Documents\private\Master Degree\Final Project\My research\TradingView\ERIK_TEST_MACD_Strategy_List_of_Trades_2022-08-21_deep_data_from_excel.xlsx'
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
 
-results = open("results_new_tradingview_025_percents_predict_result_new.csv", "a")
+results = open("results_new_tradingview_025_percents_predict_result.csv", "a")
 results.truncate(0)
 
 header = 'MACD(),MACDdiff,MACD().Avg,RSI(),"ExpAverage(close, length = 9)","ExpAverage(close, length = 21)",' \
@@ -36,7 +36,7 @@ counter_of_0p_0r = 0
 
 for row in range(2, sheet_obj.max_row):
     if (row) % 2 == 1:
-        print('row number ' + str(row))
+        print('row ' + str(row))
         if sheet_obj.cell(row = row, column = 2).value.__contains__("Exit"):
             print('FAIL at ' + str(row))
 
@@ -86,25 +86,25 @@ for row in range(2, sheet_obj.max_row):
         # profit_loss = profit_loss.replace("(", "").replace(")", "").replace("$", "").replace(",", "")
 
         pl_size = abs(float(profit_loss))/sheet_obj.cell(row, column=5).value
-        if pl_size >= 0.0025 :
-            if is_loss :
-                s = s + "," + str('0')
-                if( prediction[0]==1 ) :
-                    counter_of_1p_0r += 1;
-                else:
-                    counter_of_0p_0r += 1;
-            else:
-                s = s + "," + str('1')
-                if( prediction[0] == 1 ) :
-                    counter_of_1p_1r += 1;
-                else:
-                    counter_of_0p_1r += 1;
-        else:
+        # if pl_size >= 0.0025 :
+        if is_loss :
             s = s + "," + str('0')
-            if( prediction[0] == 1 ) :
+            if( prediction[0]==1 ) :
                 counter_of_1p_0r += 1;
             else:
                 counter_of_0p_0r += 1;
+        else:
+            s = s + "," + str('1')
+            if( prediction[0] == 1 ) :
+                counter_of_1p_1r += 1;
+            else:
+                counter_of_0p_1r += 1;
+        # else:
+        #     s = s + "," + str('0')
+        #     if( prediction[0] == 1 ) :
+        #         counter_of_1p_0r += 1;
+        #     else:
+        #         counter_of_0p_0r += 1;
 
         s = s + "," + str(profit_loss) + "\n"
 
